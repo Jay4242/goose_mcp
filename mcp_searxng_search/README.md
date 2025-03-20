@@ -1,5 +1,7 @@
 # MCP SearxNG Search
 
+![screenshot](screenshot.png)
+
 This project provides an [MCP](https://modelcontextprotocol.io/) server that allows you to perform web searches using a [SearxNG](https://github.com/searxng/searxng) instance. It exposes a tool that can be called by other MCP-compatible applications, such as Goose.
 
 ## Getting Started
