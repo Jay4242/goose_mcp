@@ -1,0 +1,18 @@
+[project]
+name = "mcp_fark"
+version = "0.1.0"
+description = "Fetches and parses headlines from Fark.com as an MCP server."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "beautifulsoup4>=4.12.3",
+    "mcp[cli]>=1.2.0",
+    "requests>=2.32.3",
+]
+
+[project.scripts]
+mcp_fark = "mcp_fark:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
