@@ -1,0 +1,18 @@
+[project]
+name = "mcp-searxng-search"
+version = "0.1.0"
+description = "MCP Server for SearxNG search."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "beautifulsoup4>=4.12.3",
+    "fastmcp==0.4.1",
+    "requests>=2.32.3",
+]
+
+[project.scripts]
+mcp-searxng-search = "mcp_searxng_search:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
