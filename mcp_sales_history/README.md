@@ -1,5 +1,7 @@
 # mcp_sales_history
 
+![Screenshot](screenshot.png)
+
 ## Description
 
 This project provides an MCP (Model Context Protocol) server that fetches sales history data from eBay based on a given search term. It allows you to retrieve information about sold items, including their titles, sold dates, selling prices, delivery prices, URLs, and image URLs.
