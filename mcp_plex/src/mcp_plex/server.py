@@ -110,6 +110,7 @@ def get_genres() -> str:
 def get_movies_by_genre(genre_id: int) -> str:
     """
     Fetches a list of movies for a specific genre from your Plex library.
+    To ensure correct operation, you MUST validate the genre_id against the output of `get_genres`.
 
     Args:
         genre_id: The key/ID of the genre to search for.
