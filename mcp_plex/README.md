@@ -1,5 +1,7 @@
 # mcp-plex
 
+![Screenshot of Chained Output](screenshot.png)
+
 An MCP server for interacting with Plex Media Server.
 
 ## Overview
