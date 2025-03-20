@@ -101,6 +101,8 @@ def list(filter_terms: List[str] = None, tasklist: str = "default") -> str:
     stdout, stderr = execute(args, tasklist=tasklist)
     if stderr:
         raise McpError(ErrorData(code=INTERNAL_ERROR, message=stderr))
+    if not stdout:
+        return "No tasks found matching the filter criteria."
     return stdout
 
 
@@ -109,13 +111,16 @@ def run(command: str, tasklist: str = "default") -> str:
     """Runs an arbitrary Taskwarrior command in a specific tasklist.
     The command should be a string containing the Taskwarrior command and its arguments.
     Example: run(command="add Buy milk project:Home priority:H due:tomorrow")
-    Consult taskwarrior.md for syntax and tips.
+    ALWAYS consult get_taskwarrior_md if this is your first task/taskwarrior command.
+    ALWAYS consult list_tasklists if this is your first task/taskwarrior command.
     """
     args = command.split()
 
     stdout, stderr = execute(args, tasklist=tasklist)
     if stderr:
         raise McpError(ErrorData(code=INTERNAL_ERROR, message=stderr))
+    if not stdout:
+        return "No output from command."
     return stdout
 
 
