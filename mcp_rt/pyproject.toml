@@ -1,0 +1,19 @@
+[project]
+name = "mcp_rt"
+version = "0.1.0"
+description = "MCP Server for Rotten Tomatoes movie data"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "beautifulsoup4>=4.12.3",
+    "mcp[cli]>=1.2.0",
+    "requests>=2.32.3",
+    "html2text>=2024.2.26",
+]
+
+[project.scripts]
+mcp_rt = "mcp_rt:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
