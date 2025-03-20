@@ -78,3 +78,82 @@ def get_unwatched_movies() -> str:
         raise McpError(ErrorData(INTERNAL_ERROR, "Unexpected data format from Plex."))
     except Exception as e:
         raise McpError(ErrorData(INTERNAL_ERROR, f"An unexpected error occurred: {e}"))
+
+@mcp.tool()
+def get_genres() -> str:
+    """
+    Fetches movie genres from Plex.
+
+    Returns:
+        A string containing a list of movie genres in the format "key: title".
+    """
+    try:
+        data = _fetch_from_plex(f"/library/sections/{PLEX_LIBRARY_SECTION}/genre")
+        genres = data['MediaContainer']['Directory']
+        if isinstance(genres, list):
+            genre_list = ""
+            for genre in genres:
+                genre_list += f"{genre['@key']}: {genre['@title']}\n"
+            return genre_list
+        else:
+            return f"{genres['@key']}: {genres['@title']}"
+    except KeyError:
+        raise McpError(ErrorData(INTERNAL_ERROR, "Unexpected data format from Plex."))
+    except Exception as e:
+        raise McpError(ErrorData(INTERNAL_ERROR, f"An unexpected error occurred: {e}"))
+
+@mcp.tool()
+def get_movies_by_genre(genre_id: int) -> str:
+    """
+    Fetches a list of movies for a specific genre from your Plex library.
+
+    Args:
+        genre_id: The key/ID of the genre to search for.
+
+    Returns:
+        A string containing a list of movie titles, ratings, year, and summary for the specified genre.
+    """
+    try:
+        data = _fetch_from_plex(f"/library/sections/{PLEX_LIBRARY_SECTION}/genre/{str(genre_id)}")
+        movies = data['MediaContainer']['Video']
+        if isinstance(movies, list):
+            movie_list = ""
+            for movie in movies:
+                title = movie['@title']
+                rating = movie.get('@rating', 'N/A')
+                audience_rating = movie.get('@audienceRating', 'N/A')
+                year = movie.get('@year', 'N/A')
+                summary = movie.get('@summary', 'N/A')
+                directors = ", ".join([d['@tag'] for d in movie.get('Director', [])]) if isinstance(movie.get('Director'), list) else movie.get('Director', 'N/A')
+                genres = ", ".join([g['@tag'] for g in movie.get('Genre', [])]) if isinstance(movie.get('Genre'), list) else movie.get('Genre', 'N/A')
+
+                movie_list += f"Title: {title}\n"
+                movie_list += f"Rating: {rating}\n"
+                movie_list += f"Audience Rating: {audience_rating}\n"
+                movie_list += f"Year: {year}\n"
+                movie_list += f"Summary: {summary}\n"
+                movie_list += f"Director(s): {directors}\n"
+                movie_list += f"Genre(s): {genres}\n\n"
+            return movie_list
+        else:
+            # Handle single movie case
+            title = movies['@title']
+            rating = movies.get('@rating', 'N/A')
+            audience_rating = movies.get('@audienceRating', 'N/A')
+            year = movies.get('@year', 'N/A')
+            summary = movies.get('@summary', 'N/A')
+            directors = ", ".join([d['@tag'] for d in movies.get('Director', [])]) if isinstance(movies.get('Director'), list) else movies.get('Director', 'N/A')
+            genres = ", ".join([g['@tag'] for g in movies.get('Genre', [])]) if isinstance(movies.get('Genre'), list) else movies.get('Genre', 'N/A')
+
+            movie_list = f"Title: {title}\n"
+            movie_list += f"Rating: {rating}\n"
+            movie_list += f"Audience Rating: {audience_rating}\n"
+            movie_list += f"Year: {year}\n"
+            movie_list += f"Summary: {summary}\n"
+            movie_list += f"Director(s): {directors}\n"
+            movie_list += f"Genre(s): {genres}\n"
+            return movie_list
+    except KeyError:
+        raise McpError(ErrorData(INTERNAL_ERROR, "Unexpected data format from Plex."))
+    except Exception as e:
+        raise McpError(ErrorData(INTERNAL_ERROR, f"An unexpected error occurred: {e}"))
