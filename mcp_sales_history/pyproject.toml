@@ -1,0 +1,19 @@
+[project]
+name = "mcp_sales_history"
+version = "0.1.0"
+description = "MCP Server for eBay Sales History"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "beautifulsoup4>=4.12.3",
+    "requests>=2.32.3",
+    "mcp[cli]>=1.2.0",
+    "html2text>=2024.2.26"
+]
+
+[project.scripts]
+mcp_sales_history = "mcp_sales_history:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
