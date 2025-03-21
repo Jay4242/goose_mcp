@@ -1,0 +1,17 @@
+[project]
+name = "mcp_doctl"
+version = "0.1.0"
+description = "MCP server to manage DigitalOcean resources using doctl"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp[cli]>=1.2.0",
+    "requests>=2.25.0",
+]
+
+[project.scripts]
+mcp_doctl = "mcp_doctl:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
