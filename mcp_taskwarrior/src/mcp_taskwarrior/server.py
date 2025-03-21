@@ -5,6 +5,7 @@ from mcp.shared.exceptions import McpError
 from mcp.types import ErrorData, INTERNAL_ERROR, INVALID_PARAMS
 from typing import List, Optional, Dict
 import shutil
+import json
 
 mcp = FastMCP("taskwarrior")
 
@@ -80,8 +81,8 @@ def create_tasklist(name: str) -> str:
 @mcp.tool()
 def delete_tasklist(name: str) -> str:
     """Deletes a task list."""
-    if name == "default":
-        raise McpError(ErrorData(code=INVALID_PARAMS, message="Cannot delete the default task list."))
+    # Removed restriction: if name == "default":
+    # Removed restriction:    raise McpError(ErrorData(code=INVALID_PARAMS, message="Cannot delete the default task list."))
     taskdata_path = get_taskdata_path(name)
     if not os.path.exists(taskdata_path):
         raise McpError(ErrorData(code=INVALID_PARAMS, message=f"Task list '{name}' does not exist."))
@@ -104,6 +105,33 @@ def list(filter_terms: List[str] = None, tasklist: str = "default") -> str:
     if not stdout:
         return "No tasks found matching the filter criteria."
     return stdout
+
+@mcp.tool()
+def get_task_data(task_id: int = None, tasklist: str = "default") -> str:
+    """Returns task data in JSON format, using the 'info' command, for a specific task_id in a specific tasklist."""
+    if task_id is None:
+        raise McpError(ErrorData(code=INVALID_PARAMS, message="task_id is required."))
+
+    args = [str(task_id), 'info']
+    stdout, stderr = execute(args, tasklist=tasklist)
+
+    if stderr:
+        raise McpError(ErrorData(code=INTERNAL_ERROR, message=stderr))
+
+    if not stdout:
+        return f"Task with ID {task_id} not found."
+
+    # Parse the output of 'task <id> info' into a JSON-like dictionary
+    task_info = {}
+    for line in stdout.splitlines():
+        if ':' in line:
+            key, value = line.split(':', 1)
+            task_info[key.strip()] = value.strip()
+
+    try:
+        return json.dumps(task_info, indent=4)
+    except Exception as e:
+        raise McpError(ErrorData(code=INTERNAL_ERROR, message=f"Error encoding JSON: {e}"))
 
 
 @mcp.tool()
