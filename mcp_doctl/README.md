@@ -8,15 +8,20 @@
 
 The following tools are available:
 
-*   **create\_droplet**: Creates a new DigitalOcean droplet.
-*   **list\_droplets**: Lists all DigitalOcean droplets in your account.
-*   **delete\_droplet**: Deletes a DigitalOcean droplet.
-*   **execute\_command\_on\_droplet**: Executes a command on a DigitalOcean droplet.
-*   **list\_available\_images**: Lists available images for creating droplets.
-*   **list\_available\_regions**: Lists available regions for creating droplets.
-*   **list\_available\_sizes**: Lists available sizes for creating droplets.
-*   **check\_droplet\_responsiveness**: Checks if a droplet is responsive.
-*   **oneclick\_list\_images**: Lists available 1-click images.
+*   **create_droplet**: Creates a new DigitalOcean droplet with configurable region, size, and image.  If no name is provided, a name will be automatically generated. Requires the `DIGITALOCEAN_SSH_KEY_ID` environment variable to be set.
+*   **list_droplets**: Lists all DigitalOcean droplets in your account.
+*   **delete_droplet**: Deletes a DigitalOcean droplet by ID.
+*   **execute_command_on_droplet**: Executes a command on a specified DigitalOcean droplet via SSH.
+*   **list_available_images**: Lists available public images for creating droplets.
+*   **list_available_regions**: Lists available regions for creating droplets.
+*   **list_available_sizes**: Lists available sizes for creating droplets.
+*   **check_droplet_responsiveness**: Checks if a droplet is responsive by attempting to connect via SSH.
+*   **oneclick_list_images**: Lists available 1-click images.
+*   **get_droplet_limit**: Retrieves the DigitalOcean account's droplet limit.
+*   **resize_droplet**: Resizes a droplet to a specified size.
+*   **reboot_droplet**: Reboots a droplet.
+*   **shutdown_droplet**: Shuts down a droplet.
+*   **rebuild_droplet**: Rebuilds a droplet with a specified image.
 
 ## Requirements
 
@@ -48,15 +53,26 @@ The following tools are available:
 
 ## Usage
 
-1.  Run the `mcp_doctl` server:
+1.  Set the `DIGITALOCEAN_SSH_KEY_ID` environment variable to your DigitalOcean SSH key ID:
 
     ```bash
-    mcp_doctl
+    export DIGITALOCEAN_SSH_KEY_ID=<your_ssh_key_id>
     ```
 
-2.  Connect to the server using an MCP client.
+2.  You can synchronize the project dependencies and create a virtual environment using `uv`:
+
+    ```bash
+    uv sync
+    ```
+
+3.  Run the `mcp_doctl` server using `uv`:
+
+    ```bash
+    uv run /path/to/mcp_doctl/.venv/bin/mcp_doctl
+    ```
+
+4.  Connect to the server using an MCP client.
 
 ## Configuration
 
-The `mcp_doctl` server uses the `doctl` command-line tool, so you need to configure `doctl` with your DigitalOcean API token. See the [doctl documentation](https://www.digitalocean.com/docs/cli/how-to/configure/) for more information.  Defaults are set on [Line22](https://github.com/Jay4242/goose_mcp/blob/6c995094115272f6211c14e9a4ff832c1beae30f/mcp_doctl/src/mcp_doctl/server.py#L22), like SSH key of the machine sending commands.
-
+The `mcp_doctl` server uses the `doctl` command-line tool, so you need to configure `doctl` with your DigitalOcean API token. See the [doctl documentation](https://www.digitalocean.com/docs/cli/how-to/configure/) for more information.
