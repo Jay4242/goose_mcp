@@ -8,6 +8,8 @@ dependencies = [
     "beautifulsoup4>=4.12.3",
     "fastmcp==0.4.1",
     "requests>=2.32.3",
+    "html2text>=2024.2.26",
+    "pdfminer.six>=20221105",
 ]
 
 [project.scripts]
