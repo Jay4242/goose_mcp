@@ -27,7 +27,7 @@ def create_droplet(name: str = None, region: str = "tor1", size: str = "s-1vcpu-
     :param region: (str, optional): The region for the droplet. Defaults to 'tor1'.
     :param size: (str, optional): The size of the droplet. Defaults to 's-1vcpu-1gb'.
     :param image: (str, optional): The image for the droplet. Defaults to 'ubuntu-24-04-x64'.
-    :param ssh_key: (str, optional): The SSH key ID to use for the droplet. Defaults to '6265419'.
+    :param ssh_key: (str, optional): The SSH key ID to use for the droplet. Defaults to ''.
     """
     if not name:
         # Generate a name based on OS, region, and timestamp
