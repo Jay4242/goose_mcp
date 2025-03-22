@@ -68,6 +68,8 @@ def searxng_search(query: str, max_results: int = 30) -> List[Dict[str, str]]:
                     'url': url,
                     'content': description
                 })
+        if not results:
+            return [{"error": "No results found for the given query."}]
         return results
     except requests.exceptions.RequestException as e:
         raise McpError(ErrorData(INTERNAL_ERROR, f"Error during search: {str(e)}"))
@@ -160,6 +162,8 @@ def searxng_news_search(query: str, time_range: Optional[Literal["day", "week", 
                     'url': url,
                     'content': description
                 })
+        if not results:
+            return [{"error": "No news articles found for the given query."}]
         return results
     except requests.exceptions.RequestException as e:
         raise McpError(ErrorData(INTERNAL_ERROR, f"Error during search: {str(e)}"))
