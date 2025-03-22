@@ -19,7 +19,7 @@ def execute_doctl_command(command):
         raise McpError(ErrorData(code=INTERNAL_ERROR, message=f"Error executing doctl command: {e.stderr}"))
 
 @mcp.tool()
-def create_droplet(name: str = None, region: str = "tor1", size: str = "s-1vcpu-1gb", image: str = "ubuntu-24-04-x64", ssh_key: str = "6265419") -> str:
+def create_droplet(name: str = None, region: str = "tor1", size: str = "s-1vcpu-1gb", image: str = "ubuntu-24-04-x64", ssh_key: str = "") -> str:
     """
     Creates a droplet with the specified parameters. All fields can be left blank to use the defaults.
     If name is not provided, it generates one.
