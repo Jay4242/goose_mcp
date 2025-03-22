@@ -2,6 +2,7 @@ import datetime
 import subprocess
 import re
 import time
+import os
 from mcp.server.fastmcp import FastMCP
 from mcp.types import ErrorData, INTERNAL_ERROR
 from mcp.shared.exceptions import McpError
@@ -16,10 +17,10 @@ def execute_doctl_command(command):
         result = subprocess.run(command, capture_output=True, text=True, check=True)
         return result.stdout
     except subprocess.CalledProcessError as e:
-        raise McpError(ErrorData(code=INTERNAL_ERROR, message=f"Error executing doctl command: {e.stderr}"))
+        return str(McpError(ErrorData(code=INTERNAL_ERROR, message=f"Error executing doctl command: {e.stderr}")))
 
 @mcp.tool()
-def create_droplet(name: str = None, region: str = "tor1", size: str = "s-1vcpu-1gb", image: str = "ubuntu-24-04-x64", ssh_key: str = "") -> str:
+def create_droplet(name: str = None, region: str = "tor1", size: str = "s-1vcpu-1gb", image: str = "ubuntu-24-04-x64") -> str:
     """
     Creates a droplet with the specified parameters. All fields can be left blank to use the defaults.
     If name is not provided, it generates one.
@@ -27,8 +28,11 @@ def create_droplet(name: str = None, region: str = "tor1", size: str = "s-1vcpu-
     :param region: (str, optional): The region for the droplet. Defaults to 'tor1'.
     :param size: (str, optional): The size of the droplet. Defaults to 's-1vcpu-1gb'.
     :param image: (str, optional): The image for the droplet. Defaults to 'ubuntu-24-04-x64'.
-    :param ssh_key: (str, optional): The SSH key ID to use for the droplet. Defaults to ''.
     """
+    ssh_key = os.environ.get("DIGITALOCEAN_SSH_KEY_ID")
+    if not ssh_key:
+        raise ValueError("DIGITALOCEAN_SSH_KEY_ID environment variable must be set.")
+
     if not name:
         # Generate a name based on OS, region, and timestamp
         os_name = image.split('-')[0]  # Extract OS name from image
@@ -54,7 +58,7 @@ def create_droplet(name: str = None, region: str = "tor1", size: str = "s-1vcpu-
     try:
         output = execute_doctl_command(command)
     except McpError as e:
-        raise
+        output = str(e)
 
     # Extract the droplet name from the output
     match = re.search(r"Droplet (.+) created", output)
@@ -75,7 +79,7 @@ def list_droplets() -> str:
         output = execute_doctl_command(command)
         return output
     except McpError as e:
-        raise
+        return str(e)
 
 @mcp.tool()
 def delete_droplet(droplet_id: int):
@@ -90,15 +94,16 @@ def delete_droplet(droplet_id: int):
         output = execute_doctl_command(command)
         return f"Droplet {droplet_id} deletion initiated."
     except McpError as e:
-        raise
+        return str(e)
 
 @mcp.tool()
-def execute_command_on_droplet(droplet_id: int, command_to_execute: str) -> str:
+def execute_command_on_droplet(droplet_id: int, command_to_execute: str, timeout: int = None) -> str:
     """
     Executes a command on a specified droplet using SSH as the root user.
 
     :param droplet_id: (int) The ID of the droplet on which to execute the command.
     :param command_to_execute: (str) The command to execute on the droplet.
+    :param timeout: (int, optional) Timeout in seconds for command execution. If None, no timeout is applied.
     :return: (str) The output of the executed command.
     """
     # Get the droplet's IP address
@@ -106,15 +111,34 @@ def execute_command_on_droplet(droplet_id: int, command_to_execute: str) -> str:
         droplet_ip_command = ["doctl", "compute", "droplet", "get", str(droplet_id), "--format", "PublicIPv4", "--no-header"]
         droplet_ip = execute_doctl_command(droplet_ip_command).strip()
     except McpError as e:
-        raise McpError(ErrorData(code=INTERNAL_ERROR, message=f"Could not retrieve droplet IP: {e}"))
+        return str(e)
+    except subprocess.CalledProcessError as e:
+        return f"Could not retrieve droplet IP: {e.stderr}"
 
     # Construct the ssh command
-    command = ["ssh", "-o", "StrictHostKeyChecking=no", f"root@{droplet_ip}", command_to_execute]
-    try:
-        result = subprocess.run(command, capture_output=True, text=True, check=True)
-        return result.stdout
-    except subprocess.CalledProcessError as e:
-        raise McpError(ErrorData(code=INTERNAL_ERROR, message=f"Error executing SSH command: {e.stderr}"))
+    ssh_command = f"ssh -o StrictHostKeyChecking=no root@{droplet_ip}"
+
+    # Only append the command if it's not empty OR if a timeout is specified
+    if command_to_execute or timeout:
+        full_command = f"{ssh_command} {command_to_execute}" if command_to_execute else ssh_command
+
+        try:
+            if timeout:
+                result = subprocess.run(full_command, capture_output=True, text=True, check=False, timeout=timeout, shell=True)
+            else:
+                result = subprocess.run(full_command, capture_output=True, text=True, check=False, shell=True)
+
+            if result.returncode == 0:
+                return result.stdout
+            else:
+                return f"Command failed with return code {result.returncode}. Output:\nStdout: {result.stdout}\nStderr: {result.stderr}"
+
+        except subprocess.CalledProcessError as e:
+            return f"Command failed with return code {e.returncode}. Output:\nStdout: {e.stdout}\nStderr: {e.stderr}"
+        except subprocess.TimeoutExpired as e:
+            return f"Command timed out after {timeout} seconds. Output:\nStdout: {e.stdout}\nStderr: {e.stderr}"
+    else:
+        return "Error: command_to_execute cannot be empty unless a timeout is specified."
 
 @mcp.tool()
 def list_available_images() -> str:
@@ -126,7 +150,7 @@ def list_available_images() -> str:
         output = execute_doctl_command(command)
         return output
     except McpError as e:
-        raise
+        return str(e)
 
 @mcp.tool()
 def list_available_regions() -> str:
@@ -138,7 +162,7 @@ def list_available_regions() -> str:
         output = execute_doctl_command(command)
         return output
     except McpError as e:
-        raise
+        return str(e)
 
 @mcp.tool()
 def list_available_sizes() -> str:
@@ -150,7 +174,7 @@ def list_available_sizes() -> str:
         output = execute_doctl_command(command)
         return output
     except McpError as e:
-        raise
+        return str(e)
 
 @mcp.tool()
 def check_droplet_responsiveness(droplet_id: int, num_tries: int = 10, sleep_duration: int = 10) -> bool:
@@ -190,7 +214,7 @@ def oneclick_list_images() -> str:
         output = execute_doctl_command(command)
         return output
     except McpError as e:
-        raise
+        return str(e)
 
 @mcp.tool()
 def get_droplet_limit() -> str:
@@ -207,7 +231,7 @@ def get_droplet_limit() -> str:
         output = execute_doctl_command(command)
         return output
     except McpError as e:
-        raise
+        return str(e)
 
 @mcp.tool()
 def resize_droplet(droplet_id: int, size: str) -> str:
@@ -223,7 +247,7 @@ def resize_droplet(droplet_id: int, size: str) -> str:
         output = execute_doctl_command(command)
         return f"Droplet {droplet_id} resize initiated to size {size}."
     except McpError as e:
-        raise
+        return str(e)
 
 @mcp.tool()
 def reboot_droplet(droplet_id: int, wait: bool = False) -> str:
@@ -241,7 +265,7 @@ def reboot_droplet(droplet_id: int, wait: bool = False) -> str:
         output = execute_doctl_command(command)
         return f"Droplet {droplet_id} reboot initiated."
     except McpError as e:
-        raise
+        return str(e)
 
 @mcp.tool()
 def shutdown_droplet(droplet_id: int, wait: bool = True) -> str:
@@ -259,7 +283,7 @@ def shutdown_droplet(droplet_id: int, wait: bool = True) -> str:
         output = execute_doctl_command(command)
         return f"Droplet {droplet_id} shutdown initiated."
     except McpError as e:
-        raise
+        return str(e)
 
 @mcp.tool()
 def rebuild_droplet(droplet_id: int, image: str) -> str:
@@ -280,4 +304,4 @@ def rebuild_droplet(droplet_id: int, image: str) -> str:
         output = execute_doctl_command(command)
         return f"Droplet {droplet_id} rebuild initiated with image {image}."
     except McpError as e:
-        raise
+        return str(e)
