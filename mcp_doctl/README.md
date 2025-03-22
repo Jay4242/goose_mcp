@@ -58,5 +58,5 @@ The following tools are available:
 
 ## Configuration
 
-The `mcp_doctl` server uses the `doctl` command-line tool, so you need to configure `doctl` with your DigitalOcean API token. See the [doctl documentation](https://www.digitalocean.com/docs/cli/how-to/configure/) for more information.
+The `mcp_doctl` server uses the `doctl` command-line tool, so you need to configure `doctl` with your DigitalOcean API token. See the [doctl documentation](https://www.digitalocean.com/docs/cli/how-to/configure/) for more information.  Defaults are set on [Line22](https://github.com/Jay4242/goose_mcp/blob/6c995094115272f6211c14e9a4ff832c1beae30f/mcp_doctl/src/mcp_doctl/server.py#L22), like SSH key of the machine sending commands.
 
