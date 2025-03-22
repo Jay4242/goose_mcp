@@ -116,17 +116,17 @@ def execute_command_on_droplet(droplet_id: int, command_to_execute: str, timeout
         return f"Could not retrieve droplet IP: {e.stderr}"
 
     # Construct the ssh command
-    ssh_command = f"ssh -o StrictHostKeyChecking=no root@{droplet_ip}"
+    ssh_command = ["ssh", "-o", "StrictHostKeyChecking=no", f"root@{droplet_ip}"]
 
     # Only append the command if it's not empty OR if a timeout is specified
     if command_to_execute or timeout:
-        full_command = f"{ssh_command} {command_to_execute}" if command_to_execute else ssh_command
+        full_command = ssh_command + [command_to_execute] if command_to_execute else ssh_command
 
         try:
             if timeout:
-                result = subprocess.run(full_command, capture_output=True, text=True, check=False, timeout=timeout, shell=True)
+                result = subprocess.run(full_command, capture_output=True, text=True, check=False, timeout=timeout)
             else:
-                result = subprocess.run(full_command, capture_output=True, text=True, check=False, shell=True)
+                result = subprocess.run(full_command, capture_output=True, text=True, check=False)
 
             if result.returncode == 0:
                 return result.stdout
