@@ -6,6 +6,8 @@ from mcp.shared.exceptions import McpError
 from mcp.types import ErrorData, INTERNAL_ERROR, INVALID_PARAMS
 from typing import List, Dict
 import html2text
+from pdfminer.high_level import extract_text
+import io
 
 mcp = FastMCP("searxng")
 
@@ -71,9 +73,10 @@ def searxng_search(query: str, max_results: int = 30) -> List[Dict[str, str]]:
 
 
 @mcp.tool()
-def fetch_and_clean_url(url: str) -> str:
+def fetch_and_clean(url: str) -> str:
     """
-    Fetches the content of a URL, converts it to Markdown, and returns the cleaned text.
+    Fetches content from a URL, determines the content type (HTML or PDF),
+    cleans the text, and returns the cleaned text.
 
     Args:
         url: The URL to fetch and clean.
@@ -84,11 +87,20 @@ def fetch_and_clean_url(url: str) -> str:
     try:
         response = requests.get(url, headers={'User-Agent': USER_AGENT}, timeout=30)
         response.raise_for_status()
-        html_content = response.text
-        text_maker = html2text.HTML2Text()
-        text_maker.body_width = 0  # Disable line wrapping
-        markdown_text = text_maker.handle(html_content)
-        return markdown_text
+        content_type = response.headers.get('Content-Type', '').lower()
+
+        if 'application/pdf' in content_type:
+            # Handle PDF content
+            pdf_file = io.BytesIO(response.content)
+            text = extract_text(pdf_file)
+            return text
+        else:
+            # Handle HTML content (or default to HTML if content type is unknown)
+            html_content = response.text
+            text_maker = html2text.HTML2Text()
+            text_maker.body_width = 0  # Disable line wrapping
+            markdown_text = text_maker.handle(html_content)
+            return markdown_text
     except requests.exceptions.RequestException as e:
         raise McpError(ErrorData(INTERNAL_ERROR, f"Error fetching URL: {str(e)}"))
     except Exception as e:
