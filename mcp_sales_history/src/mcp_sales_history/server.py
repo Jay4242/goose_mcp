@@ -138,4 +138,6 @@ def get_sales_history(search_term: str) -> str:
     ebay_url = f"https://www.ebay.com/sch/i.html?_nkw={encoded_search_term}&LH_Complete=1&LH_Sold=1"
     
     sales_data = extract_ebay_data(ebay_url)
+    if not sales_data:
+        return json.dumps("No recent sales found for this term.")
     return json.dumps(sales_data, indent=4)
