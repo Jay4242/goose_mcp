@@ -242,3 +242,21 @@ def reboot_droplet(droplet_id: int, wait: bool = False) -> str:
         return f"Droplet {droplet_id} reboot initiated."
     except McpError as e:
         raise
+
+@mcp.tool()
+def shutdown_droplet(droplet_id: int, wait: bool = True) -> str:
+    """
+    Shuts down a droplet gracefully.
+
+    :param droplet_id: (int) The ID of the droplet to shut down.
+    :param wait: (bool, optional) Whether to wait for the shutdown to complete. Defaults to True.
+    :return: (str) A message indicating that the droplet shutdown has been initiated.
+    """
+    command = ["doctl", "compute", "droplet-action", "shutdown", str(droplet_id)]
+    if wait:
+        command.append("--wait")
+    try:
+        output = execute_doctl_command(command)
+        return f"Droplet {droplet_id} shutdown initiated."
+    except McpError as e:
+        raise
