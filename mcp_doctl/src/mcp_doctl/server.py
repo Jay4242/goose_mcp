@@ -19,7 +19,7 @@ def execute_doctl_command(command):
         raise McpError(ErrorData(code=INTERNAL_ERROR, message=f"Error executing doctl command: {e.stderr}"))
 
 @mcp.tool()
-def create_droplet(name: str = None, region: str = "tor1", size: str = "s-1vcpu-1gb", image: str = "ubuntu-24-04-x64", ssh_key: str = "") -> str:
+def create_droplet(name: str = None, region: str = "tor1", size: str = "s-1vcpu-1gb", image: str = "ubuntu-24-04-x64", ssh_key: str = "6265419") -> str:
     """
     Creates a droplet with the specified parameters. All fields can be left blank to use the defaults.
     If name is not provided, it generates one.
@@ -189,5 +189,56 @@ def oneclick_list_images() -> str:
     try:
         output = execute_doctl_command(command)
         return output
+    except McpError as e:
+        raise
+
+@mcp.tool()
+def get_droplet_limit() -> str:
+    """
+    Retrieves the DigitalOcean account's droplet limit.
+
+    This tool executes the `doctl account get --format DropletLimit` command
+    to fetch the droplet limit.
+
+    :return: (str) A string containing the droplet limit.
+    """
+    command = ["doctl", "account", "get", "--format", "DropletLimit"]
+    try:
+        output = execute_doctl_command(command)
+        return output
+    except McpError as e:
+        raise
+
+@mcp.tool()
+def resize_droplet(droplet_id: int, size: str) -> str:
+    """
+    Resizes a droplet to the specified size.
+
+    :param droplet_id: (int) The ID of the droplet to resize.
+    :param size: (str) The new size for the droplet (e.g., "s-2vcpu-2gb").
+    :return: (str) A message indicating that the droplet resize has been initiated.
+    """
+    command = ["doctl", "compute", "droplet-action", "resize", str(droplet_id), "--size", size, "--resize-disk=true"]
+    try:
+        output = execute_doctl_command(command)
+        return f"Droplet {droplet_id} resize initiated to size {size}."
+    except McpError as e:
+        raise
+
+@mcp.tool()
+def reboot_droplet(droplet_id: int, wait: bool = False) -> str:
+    """
+    Reboots a droplet with the specified ID.
+
+    :param droplet_id: (int) The ID of the droplet to reboot.
+    :param wait: (bool, optional) Whether to wait for the reboot to complete. Defaults to False.
+    :return: (str) A message indicating that the droplet reboot has been initiated.
+    """
+    command = ["doctl", "compute", "droplet-action", "reboot", str(droplet_id)]
+    if wait:
+        command.append("--wait")
+    try:
+        output = execute_doctl_command(command)
+        return f"Droplet {droplet_id} reboot initiated."
     except McpError as e:
         raise
