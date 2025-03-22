@@ -1,0 +1,20 @@
+[project]
+name = "mcp_vollama"
+version = "0.1.0"
+description = "MCP Server for processing images with a local Ollama server"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "openai>=1.0.0",
+    "fastmcp>=0.4.1",
+    "Pillow>=10.0.0",
+    "requests>=2.28.0",
+    "httpx>=0.26.0"
+]
+
+[project.scripts]
+mcp_vollama = "mcp_vollama:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
