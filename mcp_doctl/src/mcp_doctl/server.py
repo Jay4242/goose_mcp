@@ -19,7 +19,7 @@ def execute_doctl_command(command):
         raise McpError(ErrorData(code=INTERNAL_ERROR, message=f"Error executing doctl command: {e.stderr}"))
 
 @mcp.tool()
-def create_droplet(name: str = None, region: str = "tor1", size: str = "s-1vcpu-1gb", image: str = "ubuntu-24-04-x64", ssh_key: str = "") -> str:
+def create_droplet(name: str = None, region: str = "tor1", size: str = "s-1vcpu-1gb", image: str = "ubuntu-24-04-x64", ssh_key: str = "6265419") -> str:
     """
     Creates a droplet with the specified parameters. All fields can be left blank to use the defaults.
     If name is not provided, it generates one.
@@ -27,7 +27,7 @@ def create_droplet(name: str = None, region: str = "tor1", size: str = "s-1vcpu-
     :param region: (str, optional): The region for the droplet. Defaults to 'tor1'.
     :param size: (str, optional): The size of the droplet. Defaults to 's-1vcpu-1gb'.
     :param image: (str, optional): The image for the droplet. Defaults to 'ubuntu-24-04-x64'.
-    :param ssh_key: (str, optional): The SSH key ID to use for the droplet. Defaults to ''.
+    :param ssh_key: (str, optional): The SSH key ID to use for the droplet. Defaults to '6265419'.
     """
     if not name:
         # Generate a name based on OS, region, and timestamp
@@ -258,5 +258,26 @@ def shutdown_droplet(droplet_id: int, wait: bool = True) -> str:
     try:
         output = execute_doctl_command(command)
         return f"Droplet {droplet_id} shutdown initiated."
+    except McpError as e:
+        raise
+
+@mcp.tool()
+def rebuild_droplet(droplet_id: int, image: str) -> str:
+    """
+    Rebuilds a droplet with the specified image.
+
+    :param droplet_id: (int) The ID of the droplet to rebuild.
+    :param image: (str) The image to rebuild the droplet with.
+    :return: (str) A message indicating that the droplet rebuild has been initiated.
+    """
+    if not droplet_id or not image:
+        error_message = "Error: Both droplet_id and image must be provided."
+        print(error_message)
+        return error_message
+
+    command = ["doctl", "compute", "droplet-action", "rebuild", str(droplet_id), "--image", image]
+    try:
+        output = execute_doctl_command(command)
+        return f"Droplet {droplet_id} rebuild initiated with image {image}."
     except McpError as e:
         raise
