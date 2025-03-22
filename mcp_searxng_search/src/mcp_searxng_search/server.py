@@ -5,6 +5,7 @@ from mcp.server.fastmcp import FastMCP
 from mcp.shared.exceptions import McpError
 from mcp.types import ErrorData, INTERNAL_ERROR, INVALID_PARAMS
 from typing import List, Dict
+import html2text
 
 mcp = FastMCP("searxng")
 
@@ -65,5 +66,30 @@ def searxng_search(query: str, max_results: int = 30) -> List[Dict[str, str]]:
         return results
     except requests.exceptions.RequestException as e:
         raise McpError(ErrorData(INTERNAL_ERROR, f"Error during search: {str(e)}"))
+    except Exception as e:
+        raise McpError(ErrorData(INTERNAL_ERROR, f"Unexpected error: {str(e)}"))
+
+
+@mcp.tool()
+def fetch_and_clean_url(url: str) -> str:
+    """
+    Fetches the content of a URL, converts it to Markdown, and returns the cleaned text.
+
+    Args:
+        url: The URL to fetch and clean.
+
+    Returns:
+        The cleaned text content of the URL.
+    """
+    try:
+        response = requests.get(url, headers={'User-Agent': USER_AGENT}, timeout=30)
+        response.raise_for_status()
+        html_content = response.text
+        text_maker = html2text.HTML2Text()
+        text_maker.body_width = 0  # Disable line wrapping
+        markdown_text = text_maker.handle(html_content)
+        return markdown_text
+    except requests.exceptions.RequestException as e:
+        raise McpError(ErrorData(INTERNAL_ERROR, f"Error fetching URL: {str(e)}"))
     except Exception as e:
         raise McpError(ErrorData(INTERNAL_ERROR, f"Unexpected error: {str(e)}"))
