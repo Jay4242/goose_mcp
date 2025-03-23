@@ -42,6 +42,22 @@ This project provides an MCP (Model Context Protocol) server that allows you to 
 Set the following environment variables:
 
 -   `PLEX_URL`: The URL of your Plex Media Server (default: `http://plex.lan`).
--   `PLEX_LIBRARY_SECTION`: The library section ID for movies (default: `1`).
 -   `PLEX_API_KEY`: Your Plex API key.
 
+### Integration with Goose
+
+Similar to the [custom extensions guide](https://block.github.io/goose/docs/tutorials/custom-extensions), you can integrate this MCP server with Goose.
+
+1.  Build the project environment:
+
+    ```bash
+    uv sync
+    ```
+
+2.  Run the server using `uv run`:
+
+    ```bash
+    uv run src/mcp_plex/server.py
+    ```
+
+   This will start the MCP server, and you can then add it as an extension in Goose, pointing to the running server.
