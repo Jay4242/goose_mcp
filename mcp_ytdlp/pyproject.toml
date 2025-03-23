@@ -1,0 +1,19 @@
+[project]
+name = "mcp_ytdlp"
+version = "0.1.0"
+description = "A MCP server to extract subtitles from YouTube videos using yt-dlp."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "yt-dlp",
+    "mcp[cli]>=1.2.0",
+    "html2text>=2024.2.26",
+    "requests>=2.32.3",
+]
+
+[project.scripts]
+mcp_ytdlp = "mcp_ytdlp:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
