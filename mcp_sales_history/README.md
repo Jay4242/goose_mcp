@@ -25,27 +25,38 @@ This project provides an MCP (Model Context Protocol) server that fetches sales 
 
 1.  Clone the repository:
 
-    `git clone <repository_url>`
+    ``git clone <repository_url>``
 
 2.  Navigate to the project directory:
 
-    `cd mcp_sales_history`
+    ``cd mcp_sales_history``
 
 3.  Install the dependencies using `uv`:
 
-    `uv pip install .`
+    ``uv sync``
 
 ## Usage
 
 1.  Run the MCP server:
 
-    `mcp run src/mcp_sales_history/server.py`
+    ``uv run src/mcp_sales_history/server.py``
 
 2.  Alternatively, after publishing the package to pypi, the server can be run directly using `uvx`:
 
-    `uvx mcp_sales_history`
+    ``uvx mcp_sales_history``
 
 3.  Use the `get_sales_history` tool with a search term to fetch sales data.
+
+## Integration with Goose
+
+To add this MCP server as an extension in Goose:
+
+1.  Go to Settings > Extensions > Add.
+2.  Set the Type to StandardIO.
+3.  Provide the ID, name, and description for your extension.
+4.  In the Command field, provide the absolute path to your executable. For example:
+
+    ``uv run /full/path/to/mcp_sales_history/.venv/bin/mcp_sales_history``
 
 ## MCP Tool
 
@@ -60,14 +71,14 @@ The project exposes the following MCP tool:
 
 To use the `get_sales_history` tool, you can send a request to the MCP server with the desired search term. For example:
 
-```json
+``json
 {
   "tool_name": "get_sales_history",
   "tool_args": {
     "search_term": "iPhone 13"
   }
 }
-```
+``
 
 The server will respond with a JSON string containing the sales history data for "iPhone 13".
 
