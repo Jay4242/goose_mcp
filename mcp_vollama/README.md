@@ -1,6 +1,6 @@
 # MCP Vollama
 
-This is an MCP (Model Context Protocol) server that processes images using a local Ollama server. It allows you to send an image URL and a prompt to the server, which will then use Ollama to analyze the image and return a text response.
+This is an MCP (Model Context Protocol) server that processes images using a local Ollama server. It allows you to send one or two image URLs and up to three prompts to the server, which will then use Ollama to analyze the images and return a text response. The prompts are interleaved with the images in the order they are provided.
 
 ## Prerequisites
 
