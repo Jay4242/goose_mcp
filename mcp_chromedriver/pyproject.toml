@@ -1,0 +1,20 @@
+[project]
+name = "mcp_chromedriver"
+version = "0.1.0"
+description = "A MCP server that interacts with chromedriver."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "selenium>=4.0.0",
+    "mcp[cli]>=1.2.0",
+    "webdriver_manager>=4.0.0",
+    "html2text>=2020.1.16",
+    "selenium-wire>=5.0.0",
+]
+
+[project.scripts]
+mcp_chromedriver = "mcp_chromedriver:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
