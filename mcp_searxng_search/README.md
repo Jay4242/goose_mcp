@@ -2,7 +2,7 @@
 
 ![screenshot](screenshot.png)
 
-This project provides an [MCP](https://modelcontextprotocol.io/) server that allows you to perform web searches using a [SearxNG](https://github.com/searxng/searxng) instance. It exposes a tool that can be called by other MCP-compatible applications, such as Goose.
+This project provides an [MCP](https://modelcontextprotocol.io/) server that allows you to perform web searches using a [SearxNG](https://github.com/searxng/searxng) instance. It exposes a set of tools that can be called by other MCP-compatible applications, such as Goose.
 
 ## Getting Started
 
@@ -25,4 +25,26 @@ This project provides an [MCP](https://modelcontextprotocol.io/) server that all
 
 6.  **Using the extension:** Once integrated, you can start using your extension in Goose. Open the Goose chat interface and call your tool as needed. You can verify that Goose has picked up the tools from your custom extension by asking it "what tools do you have?"
 
-The tool ID is `searxng_search`. It accepts two parameters: `query` (the search query) and `max_results` (the maximum number of results to return, defaults to 30).
+### Available Tools
+
+*   **searxng_search**: Searches the web using a SearxNG instance and returns a list of results.
+    *   Parameters:
+        *   `query` (str, required): The search query.
+        *   `max_results` (int, optional): The maximum number of results to return (defaults to 30).
+*   **searxng_image_search**: Searches the web for images using a SearxNG instance and returns a list of image results.
+    *   Parameters:
+        *   `query` (str, required): The search query.
+        *   `max_results` (int, optional): The maximum number of results to return (defaults to 30).
+*   **fetch_and_clean**: Fetches content from a URL, determines the content type (HTML or PDF), cleans the text, and returns the cleaned text.
+    *   Parameters:
+        *   `url` (str, required): The URL to fetch and clean.
+*   **searxng_news_search**: Searches the web for news articles using a SearxNG instance and returns a list of results.
+    *   Parameters:
+        *   `query` (str, required): The search query.
+        *   `time_range` (str, optional): The time range to filter results by. Valid values are "day", "week", "month", and "year". Defaults to no time limit.
+        *   `max_results` (int, optional): The maximum number of results to return (defaults to 30).
+*   **searxng_file_search**: Searches for files using a SearxNG instance and returns a list of results, including magnet URIs, seeders, and leechers.
+    *   Parameters:
+        *   `query` (str, required): The search query.
+        *   `time_range` (str, optional): The time range to filter results by. Valid values are "day", "week", "month", and "year". Defaults to no time limit.
+        *   `max_results` (int, optional): The maximum number of results to return (defaults to 30).
