@@ -22,6 +22,7 @@ class Terminal:
         self.address = self.Address(self)
         self.card = self.Card(self)
         self.cart = self.Cart(self)
+        self.order = self.Order(self)
 
     def _get(self, path: str) -> Dict:
         return self._request("GET", path)
@@ -182,6 +183,27 @@ class Terminal:
         def clear(self) -> Dict:
             """Clears the current user's cart."""
             return self.terminal._delete("/cart")
+
+    class Order:
+        def __init__(self, terminal):
+            self.terminal = terminal
+
+        def list(self) -> List[Dict]:
+            """Lists the current user's orders."""
+            return self.terminal._get("/order")
+
+        def get(self, order_id: str) -> Dict:
+            """Gets an order by ID."""
+            return self.terminal._get(f"/order/{order_id}")
+
+        def create(self, address_id: str, card_id: str, variants: Dict[str, int]) -> Dict:
+            """Creates a new order."""
+            data = {
+                "address_id": address_id,
+                "card_id": card_id,
+                "variants": variants,
+            }
+            return self.terminal._post("/order", data)
 
 
 terminal_client: Optional[Terminal] = None
@@ -407,3 +429,30 @@ def clear_cart() -> Dict:
         return terminal_client.cart.clear()
     except Exception as e:
         raise ErrorData(INTERNAL_ERROR, f"Failed to clear cart: {e}")
+
+@mcp.tool()
+def list_orders() -> List[Dict]:
+    """Lists the current user's orders."""
+    check_terminal_client()
+    try:
+        return terminal_client.order.list()
+    except Exception as e:
+        raise ErrorData(INTERNAL_ERROR, f"Failed to list orders: {e}")
+
+@mcp.tool()
+def get_order(order_id: str) -> Dict:
+    """Gets an order by ID."""
+    check_terminal_client()
+    try:
+        return terminal_client.order.get(order_id)
+    except Exception as e:
+        raise ErrorData(INTERNAL_ERROR, f"Failed to get order: {e}")
+
+@mcp.tool()
+def create_order(address_id: str, card_id: str, variants: Dict[str, int]) -> Dict:
+    """Creates a new order."""
+    check_terminal_client()
+    try:
+        return terminal_client.order.create(address_id, card_id, variants)
+    except Exception as e:
+        raise ErrorData(INTERNAL_ERROR, f"Failed to create order: {e}")
