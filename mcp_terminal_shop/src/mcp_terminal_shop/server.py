@@ -21,6 +21,7 @@ class Terminal:
         self.profile = self.Profile(self)
         self.address = self.Address(self)
         self.card = self.Card(self)
+        self.cart = self.Cart(self)
 
     def _get(self, path: str) -> Dict:
         return self._request("GET", path)
@@ -150,6 +151,37 @@ class Terminal:
         def delete(self, card_id: str) -> Dict:
             """Deletes a credit card by ID."""
             return self.terminal._delete(f"/card/{card_id}")
+
+    class Cart:
+        def __init__(self, terminal):
+            self.terminal = terminal
+
+        def get(self) -> Dict:
+            """Gets the current user's cart."""
+            return self.terminal._get("/cart")
+
+        def set_item(self, product_variant_id: str, quantity: int) -> Dict:
+            """Adds an item to the current user's cart."""
+            data = {"product_variant_id": product_variant_id, "quantity": quantity}
+            return self.terminal._put("/cart/item", data)
+
+        def set_address(self, address_id: str) -> Dict:
+            """Sets the shipping address for the current user's cart."""
+            data = {"address_id": address_id}
+            return self.terminal._put("/cart/address", data)
+
+        def set_card(self, card_id: str) -> Dict:
+            """Sets the credit card for the current user's cart."""
+            data = {"card_id": card_id}
+            return self.terminal._put("/cart/card", data)
+
+        def convert(self) -> Dict:
+            """Converts the current user's cart to an order."""
+            return self.terminal._post("/cart/convert")
+
+        def clear(self) -> Dict:
+            """Clears the current user's cart."""
+            return self.terminal._delete("/cart")
 
 
 terminal_client: Optional[Terminal] = None
@@ -321,3 +353,57 @@ def delete_card(card_id: str) -> Dict:
         return terminal_client.card.delete(card_id)
     except Exception as e:
         raise ErrorData(INTERNAL_ERROR, f"Failed to delete card: {e}")
+
+@mcp.tool()
+def get_cart() -> Dict:
+    """Gets the current user's cart."""
+    check_terminal_client()
+    try:
+        return terminal_client.cart.get()
+    except Exception as e:
+        raise ErrorData(INTERNAL_ERROR, f"Failed to get cart: {e}")
+
+@mcp.tool()
+def set_cart_item(product_variant_id: str, quantity: int) -> Dict:
+    """Adds an item to the current user's cart."""
+    check_terminal_client()
+    try:
+        return terminal_client.cart.set_item(product_variant_id, quantity)
+    except Exception as e:
+        raise ErrorData(INTERNAL_ERROR, f"Failed to set cart item: {e}")
+
+@mcp.tool()
+def set_cart_address(address_id: str) -> Dict:
+    """Sets the shipping address for the current user's cart."""
+    check_terminal_client()
+    try:
+        return terminal_client.cart.set_address(address_id)
+    except Exception as e:
+        raise ErrorData(INTERNAL_ERROR, f"Failed to set cart address: {e}")
+
+@mcp.tool()
+def set_cart_card(card_id: str) -> Dict:
+    """Sets the credit card for the current user's cart."""
+    check_terminal_client()
+    try:
+        return terminal_client.cart.set_card(card_id)
+    except Exception as e:
+        raise ErrorData(INTERNAL_ERROR, f"Failed to set cart card: {e}")
+
+@mcp.tool()
+def convert_cart() -> Dict:
+    """Converts the current user's cart to an order."""
+    check_terminal_client()
+    try:
+        return terminal_client.cart.convert()
+    except Exception as e:
+        raise ErrorData(INTERNAL_ERROR, f"Failed to convert cart: {e}")
+
+@mcp.tool()
+def clear_cart() -> Dict:
+    """Clears the current user's cart."""
+    check_terminal_client()
+    try:
+        return terminal_client.cart.clear()
+    except Exception as e:
+        raise ErrorData(INTERNAL_ERROR, f"Failed to clear cart: {e}")
