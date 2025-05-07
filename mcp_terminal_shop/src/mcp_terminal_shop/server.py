@@ -45,17 +45,17 @@ class Terminal:
             return response.json()
         except requests.exceptions.HTTPError as e:
             if response.status_code == 400:
-                raise ErrorData(INVALID_PARAMS, f"Bad Request: {e}")
+                raise ErrorData(f"{INVALID_PARAMS}: Bad Request: {e}")
             if response.status_code == 401:
-                raise ErrorData(INTERNAL_ERROR, "Unauthorized: Invalid bearer token.") from e
+                raise ErrorData(f"{INTERNAL_ERROR}: Unauthorized: Invalid bearer token.") from e
             elif response.status_code == 404:
-                raise ErrorData(INTERNAL_ERROR, "Not Found: Resource not found.") from e
+                raise ErrorData(f"{INTERNAL_ERROR}: Not Found: Resource not found.") from e
             elif response.status_code == 429:
-                raise ErrorData(INTERNAL_ERROR, "Too Many Requests: Rate limit exceeded.") from e
+                raise ErrorData(f"{INTERNAL_ERROR}: Too Many Requests: Rate limit exceeded.") from e
             else:
-                raise ErrorData(INTERNAL_ERROR, f"API request failed with status code {response.status_code}: {e}") from e
+                raise ErrorData(f"{INTERNAL_ERROR}: API request failed with status code {response.status_code}: {e}") from e
         except requests.exceptions.RequestException as e:
-            raise ErrorData(INTERNAL_ERROR, f"API request failed: {e}") from e
+            raise ErrorData(f"{INTERNAL_ERROR}: API request failed: {e}") from e
 
     def list_products(self) -> List[Dict]:
         """Lists all products for sale in the Terminal shop."""
@@ -159,30 +159,30 @@ class Terminal:
             self.terminal = terminal
 
         def get(self) -> Dict:
-            """Gets the current user's cart."""
+            """Retrieves the current user's shopping cart, including items, quantities, and associated details."""
             return self.terminal._get("/cart")
 
         def set_item(self, product_variant_id: str, quantity: int) -> Dict:
-            """Adds an item to the current user's cart."""
+            """Adds or updates an item in the current user's shopping cart.  Specify the product variant and quantity."""
             data = {"product_variant_id": product_variant_id, "quantity": quantity}
             return self.terminal._put("/cart/item", data)
 
         def set_address(self, address_id: str) -> Dict:
-            """Sets the shipping address for the current user's cart."""
+            """Sets the shipping address for the current user's shopping cart.  Specify the address ID to use."""
             data = {"address_id": address_id}
             return self.terminal._put("/cart/address", data)
 
         def set_card(self, card_id: str) -> Dict:
-            """Sets the credit card for the current user's cart."""
+            """Sets the credit card for the current user's shopping cart. Specify the card ID to use."""
             data = {"card_id": card_id}
             return self.terminal._put("/cart/card", data)
 
         def convert(self) -> Dict:
-            """Converts the current user's cart to an order."""
+            """Converts the current user's shopping cart into a new order.  This will finalize the purchase."""
             return self.terminal._post("/cart/convert")
 
         def clear(self) -> Dict:
-            """Clears the current user's cart."""
+            """Removes all items from the current user's shopping cart, effectively emptying it."""
             return self.terminal._delete("/cart")
 
     class Order:
@@ -246,7 +246,7 @@ else:
 
 def check_terminal_client():
     if terminal_client is None:
-        raise ErrorData(INTERNAL_ERROR, "Terminal shop tools are disabled because TERMINAL_BEARER_TOKEN is not set.")
+        raise ErrorData(f"{INTERNAL_ERROR}: Terminal shop tools are disabled because TERMINAL_BEARER_TOKEN is not set.")
 
 @mcp.tool()
 def list_products() -> List[Dict]:
@@ -257,7 +257,7 @@ def list_products() -> List[Dict]:
     try:
         return terminal_client.list_products()
     except Exception as e:
-        raise ErrorData(INTERNAL_ERROR, f"Failed to list products: {e}")
+        raise ErrorData(f"{INTERNAL_ERROR}: Failed to list products: {e}")
 
 @mcp.tool()
 def get_product(product_id: str) -> Dict:
@@ -270,7 +270,7 @@ def get_product(product_id: str) -> Dict:
     try:
         return terminal_client.get_product(product_id)
     except Exception as e:
-        raise ErrorData(INTERNAL_ERROR, f"Failed to get product: {e}")
+        raise ErrorData(f"{INTERNAL_ERROR}: Failed to get product: {e}")
 
 @mcp.tool()
 def list_tokens() -> List[Dict]:
@@ -279,7 +279,7 @@ def list_tokens() -> List[Dict]:
     try:
         return terminal_client.token.list()
     except Exception as e:
-        raise ErrorData(INTERNAL_ERROR, f"Failed to list tokens: {e}")
+        raise ErrorData(f"{INTERNAL_ERROR}: Failed to list tokens: {e}")
 
 @mcp.tool()
 def get_token(token_id: str) -> Dict:
@@ -288,7 +288,7 @@ def get_token(token_id: str) -> Dict:
     try:
         return terminal_client.token.get(token_id)
     except Exception as e:
-        raise ErrorData(INTERNAL_ERROR, f"Failed to get token: {e}")
+        raise ErrorData(f"{INTERNAL_ERROR}: Failed to get token: {e}")
 
 @mcp.tool()
 def create_token() -> Dict:
@@ -297,7 +297,7 @@ def create_token() -> Dict:
     try:
         return terminal_client.token.create()
     except Exception as e:
-        raise ErrorData(INTERNAL_ERROR, f"Failed to create token: {e}")
+        raise ErrorData(f"{INTERNAL_ERROR}: Failed to create token: {e}")
 
 @mcp.tool()
 def delete_token(token_id: str) -> Dict:
@@ -306,7 +306,7 @@ def delete_token(token_id: str) -> Dict:
     try:
         return terminal_client.token.delete(token_id)
     except Exception as e:
-        raise ErrorData(INTERNAL_ERROR, f"Failed to delete token: {e}")
+        raise ErrorData(f"{INTERNAL_ERROR}: Failed to delete token: {e}")
 
 @mcp.tool()
 def get_profile() -> Dict:
@@ -315,7 +315,7 @@ def get_profile() -> Dict:
     try:
         return terminal_client.profile.get()
     except Exception as e:
-        raise ErrorData(INTERNAL_ERROR, f"Failed to get profile: {e}")
+        raise ErrorData(f"{INTERNAL_ERROR}: Failed to get profile: {e}")
 
 @mcp.tool()
 def update_profile(email: str = None, name: str = None) -> Dict:
@@ -324,7 +324,7 @@ def update_profile(email: str = None, name: str = None) -> Dict:
     try:
         return terminal_client.profile.update(email=email, name=name)
     except Exception as e:
-        raise ErrorData(INTERNAL_ERROR, f"Failed to update profile: {e}")
+        raise ErrorData(f"{INTERNAL_ERROR}: Failed to update profile: {e}")
 
 @mcp.tool()
 def list_addresses() -> List[Dict]:
@@ -333,7 +333,7 @@ def list_addresses() -> List[Dict]:
     try:
         return terminal_client.address.list()
     except Exception as e:
-        raise ErrorData(INTERNAL_ERROR, f"Failed to list addresses: {e}")
+        raise ErrorData(f"{INTERNAL_ERROR}: Failed to list addresses: {e}")
 
 @mcp.tool()
 def get_address(address_id: str) -> Dict:
@@ -342,7 +342,7 @@ def get_address(address_id: str) -> Dict:
     try:
         return terminal_client.address.get(address_id)
     except Exception as e:
-        raise ErrorData(INTERNAL_ERROR, f"Failed to get address: {e}")
+        raise ErrorData(f"{INTERNAL_ERROR}: Failed to get address: {e}")
 
 @mcp.tool()
 def create_address(city: str, country: str, name: str, street1: str, zip: str) -> Dict:
@@ -351,7 +351,7 @@ def create_address(city: str, country: str, name: str, street1: str, zip: str) -
     try:
         return terminal_client.address.create(city, country, name, street1, zip)
     except Exception as e:
-        raise ErrorData(INTERNAL_ERROR, f"Failed to create address: {e}")
+        raise ErrorData(f"{INTERNAL_ERROR}: Failed to create address: {e}")
 
 @mcp.tool()
 def delete_address(address_id: str) -> Dict:
@@ -360,7 +360,7 @@ def delete_address(address_id: str) -> Dict:
     try:
         return terminal_client.address.delete(address_id)
     except Exception as e:
-        raise ErrorData(INTERNAL_ERROR, f"Failed to delete address: {e}")
+        raise ErrorData(f"{INTERNAL_ERROR}: Failed to delete address: {e}")
 
 @mcp.tool()
 def list_cards() -> List[Dict]:
@@ -369,7 +369,7 @@ def list_cards() -> List[Dict]:
     try:
         return terminal_client.card.list()
     except Exception as e:
-        raise ErrorData(INTERNAL_ERROR, f"Failed to list cards: {e}")
+        raise ErrorData(f"{INTERNAL_ERROR}: Failed to list cards: {e}")
 
 @mcp.tool()
 def get_card(card_id: str) -> Dict:
@@ -378,7 +378,7 @@ def get_card(card_id: str) -> Dict:
     try:
         return terminal_client.card.get(card_id)
     except Exception as e:
-        raise ErrorData(INTERNAL_ERROR, f"Failed to get card: {e}")
+        raise ErrorData(f"{INTERNAL_ERROR}: Failed to get card: {e}")
 
 @mcp.tool()
 def create_card(token: str) -> Dict:
@@ -387,7 +387,7 @@ def create_card(token: str) -> Dict:
     try:
         return terminal_client.card.create(token)
     except Exception as e:
-        raise ErrorData(INTERNAL_ERROR, f"Failed to create card: {e}")
+        raise ErrorData(f"{INTERNAL_ERROR}: Failed to create card: {e}")
 
 @mcp.tool()
 def collect_card() -> Dict:
@@ -396,7 +396,7 @@ def collect_card() -> Dict:
     try:
         return terminal_client.card.collect()
     except Exception as e:
-        raise ErrorData(INTERNAL_ERROR, f"Failed to collect card: {e}")
+        raise ErrorData(f"{INTERNAL_ERROR}: Failed to collect card: {e}")
 
 @mcp.tool()
 def delete_card(card_id: str) -> Dict:
@@ -405,61 +405,61 @@ def delete_card(card_id: str) -> Dict:
     try:
         return terminal_client.card.delete(card_id)
     except Exception as e:
-        raise ErrorData(INTERNAL_ERROR, f"Failed to delete card: {e}")
+        raise ErrorData(f"{INTERNAL_ERROR}: Failed to delete card: {e}")
 
 @mcp.tool()
 def get_cart() -> Dict:
-    """Gets the current user's cart."""
+    """Retrieves the current user's shopping cart, including items, quantities, and associated details."""
     check_terminal_client()
     try:
         return terminal_client.cart.get()
     except Exception as e:
-        raise ErrorData(INTERNAL_ERROR, f"Failed to get cart: {e}")
+        raise ErrorData(f"{INTERNAL_ERROR}: Failed to get cart: {e}")
 
 @mcp.tool()
 def set_cart_item(product_variant_id: str, quantity: int) -> Dict:
-    """Adds an item to the current user's cart."""
+    """Adds or updates an item in the current user's shopping cart.  Specify the product variant ID and quantity."""
     check_terminal_client()
     try:
         return terminal_client.cart.set_item(product_variant_id, quantity)
     except Exception as e:
-        raise ErrorData(INTERNAL_ERROR, f"Failed to set cart item: {e}")
+        raise ErrorData(f"{INTERNAL_ERROR}: Failed to set cart item: {e}")
 
 @mcp.tool()
 def set_cart_address(address_id: str) -> Dict:
-    """Sets the shipping address for the current user's cart."""
+    """Sets the shipping address for the current user's shopping cart.  Specify the address ID to use."""
     check_terminal_client()
     try:
         return terminal_client.cart.set_address(address_id)
     except Exception as e:
-        raise ErrorData(INTERNAL_ERROR, f"Failed to set cart address: {e}")
+        raise ErrorData(f"{INTERNAL_ERROR}: Failed to set cart address: {e}")
 
 @mcp.tool()
 def set_cart_card(card_id: str) -> Dict:
-    """Sets the credit card for the current user's cart."""
+    """Sets the credit card for the current user's shopping cart. Specify the card ID to use."""
     check_terminal_client()
     try:
         return terminal_client.cart.set_card(card_id)
     except Exception as e:
-        raise ErrorData(INTERNAL_ERROR, f"Failed to set cart card: {e}")
+        raise ErrorData(f"{INTERNAL_ERROR}: Failed to set cart card: {e}")
 
 @mcp.tool()
 def convert_cart() -> Dict:
-    """Converts the current user's cart to an order."""
+    """Converts the current user's shopping cart into a new order.  This will finalize the purchase."""
     check_terminal_client()
     try:
         return terminal_client.cart.convert()
     except Exception as e:
-        raise ErrorData(INTERNAL_ERROR, f"Failed to convert cart: {e}")
+        raise ErrorData(f"{INTERNAL_ERROR}: Failed to convert cart: {e}")
 
 @mcp.tool()
 def clear_cart() -> Dict:
-    """Clears the current user's cart."""
+    """Removes all items from the current user's shopping cart, effectively emptying it."""
     check_terminal_client()
     try:
         return terminal_client.cart.clear()
     except Exception as e:
-        raise ErrorData(INTERNAL_ERROR, f"Failed to clear cart: {e}")
+        raise ErrorData(f"{INTERNAL_ERROR}: Failed to clear cart: {e}")
 
 @mcp.tool()
 def list_orders() -> List[Dict]:
@@ -468,7 +468,7 @@ def list_orders() -> List[Dict]:
     try:
         return terminal_client.order.list()
     except Exception as e:
-        raise ErrorData(INTERNAL_ERROR, f"Failed to list orders: {e}")
+        raise ErrorData(f"{INTERNAL_ERROR}: Failed to list orders: {e}")
 
 @mcp.tool()
 def get_order(order_id: str) -> Dict:
@@ -477,7 +477,7 @@ def get_order(order_id: str) -> Dict:
     try:
         return terminal_client.order.get(order_id)
     except Exception as e:
-        raise ErrorData(INTERNAL_ERROR, f"Failed to get order: {e}")
+        raise ErrorData(f"{INTERNAL_ERROR}: Failed to get order: {e}")
 
 @mcp.tool()
 def create_order(address_id: str, card_id: str, variants: Dict[str, int]) -> Dict:
@@ -486,7 +486,7 @@ def create_order(address_id: str, card_id: str, variants: Dict[str, int]) -> Dic
     try:
         return terminal_client.order.create(address_id, card_id, variants)
     except Exception as e:
-        raise ErrorData(INTERNAL_ERROR, f"Failed to create order: {e}")
+        raise ErrorData(f"{INTERNAL_ERROR}: Failed to create order: {e}")
 
 @mcp.tool()
 def list_subscriptions() -> List[Dict]:
@@ -495,7 +495,7 @@ def list_subscriptions() -> List[Dict]:
     try:
         return terminal_client.subscription.list()
     except Exception as e:
-        raise ErrorData(INTERNAL_ERROR, f"Failed to list subscriptions: {e}")
+        raise ErrorData(f"{INTERNAL_ERROR}: Failed to list subscriptions: {e}")
 
 @mcp.tool()
 def get_subscription(subscription_id: str) -> Dict:
@@ -504,7 +504,7 @@ def get_subscription(subscription_id: str) -> Dict:
     try:
         return terminal_client.subscription.get(subscription_id)
     except Exception as e:
-        raise ErrorData(INTERNAL_ERROR, f"Failed to get subscription: {e}")
+        raise ErrorData(f"{INTERNAL_ERROR}: Failed to get subscription: {e}")
 
 @mcp.tool()
 def update_subscription(subscription_id: str, data: str) -> Dict:
@@ -514,9 +514,9 @@ def update_subscription(subscription_id: str, data: str) -> Dict:
         data_dict = json.loads(data)
         return terminal_client.subscription.update(subscription_id, data_dict)
     except json.JSONDecodeError as e:
-        raise ErrorData(INVALID_PARAMS, f"Invalid JSON format: {e}")
+        raise ErrorData(f"{INVALID_PARAMS}: Invalid JSON format: {e}")
     except Exception as e:
-        raise ErrorData(INTERNAL_ERROR, f"Failed to update subscription: {e}")
+        raise ErrorData(f"{INTERNAL_ERROR}: Failed to update subscription: {e}")
 
 @mcp.tool()
 def create_subscription(address_id: str, card_id: str, product_variant_id: str, quantity: int) -> Dict:
@@ -525,7 +525,7 @@ def create_subscription(address_id: str, card_id: str, product_variant_id: str, 
     try:
         return terminal_client.subscription.create(address_id, card_id, product_variant_id, quantity)
     except Exception as e:
-        raise ErrorData(INTERNAL_ERROR, f"Failed to create subscription: {e}")
+        raise ErrorData(f"{INTERNAL_ERROR}: Failed to create subscription: {e}")
 
 @mcp.tool()
 def delete_subscription(subscription_id: str) -> Dict:
@@ -534,4 +534,4 @@ def delete_subscription(subscription_id: str) -> Dict:
     try:
         return terminal_client.subscription.delete(subscription_id)
     except Exception as e:
-        raise ErrorData(INTERNAL_ERROR, f"Failed to delete subscription: {e}")
+        raise ErrorData(f"{INTERNAL_ERROR}: Failed to delete subscription: {e}")
