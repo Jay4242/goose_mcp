@@ -23,6 +23,7 @@ class Terminal:
         self.card = self.Card(self)
         self.cart = self.Cart(self)
         self.order = self.Order(self)
+        self.subscription = self.Subscription(self)
 
     def _get(self, path: str) -> Dict:
         return self._request("GET", path)
@@ -204,6 +205,36 @@ class Terminal:
                 "variants": variants,
             }
             return self.terminal._post("/order", data)
+
+    class Subscription:
+        def __init__(self, terminal):
+            self.terminal = terminal
+
+        def list(self) -> List[Dict]:
+            """Lists the current user's subscriptions."""
+            return self.terminal._get("/subscription")
+
+        def get(self, subscription_id: str) -> Dict:
+            """Gets a subscription by ID."""
+            return self.terminal._get(f"/subscription/{subscription_id}")
+
+        def update(self, subscription_id: str, data: Dict) -> Dict:
+            """Updates a subscription by ID."""
+            return self.terminal._put(f"/subscription/{subscription_id}", data)
+
+        def create(self, address_id: str, card_id: str, product_variant_id: str, quantity: int) -> Dict:
+            """Creates a new subscription."""
+            data = {
+                "address_id": address_id,
+                "card_id": card_id,
+                "product_variant_id": product_variant_id,
+                "quantity": quantity,
+            }
+            return self.terminal._post("/subscription", data)
+
+        def delete(self, subscription_id: str) -> Dict:
+            """Deletes a subscription by ID."""
+            return self.terminal._delete(f"/subscription/{subscription_id}")
 
 
 terminal_client: Optional[Terminal] = None
@@ -456,3 +487,51 @@ def create_order(address_id: str, card_id: str, variants: Dict[str, int]) -> Dic
         return terminal_client.order.create(address_id, card_id, variants)
     except Exception as e:
         raise ErrorData(INTERNAL_ERROR, f"Failed to create order: {e}")
+
+@mcp.tool()
+def list_subscriptions() -> List[Dict]:
+    """Lists the current user's subscriptions."""
+    check_terminal_client()
+    try:
+        return terminal_client.subscription.list()
+    except Exception as e:
+        raise ErrorData(INTERNAL_ERROR, f"Failed to list subscriptions: {e}")
+
+@mcp.tool()
+def get_subscription(subscription_id: str) -> Dict:
+    """Gets a subscription by ID."""
+    check_terminal_client()
+    try:
+        return terminal_client.subscription.get(subscription_id)
+    except Exception as e:
+        raise ErrorData(INTERNAL_ERROR, f"Failed to get subscription: {e}")
+
+@mcp.tool()
+def update_subscription(subscription_id: str, data: str) -> Dict:
+    """Updates a subscription by ID."""
+    check_terminal_client()
+    try:
+        data_dict = json.loads(data)
+        return terminal_client.subscription.update(subscription_id, data_dict)
+    except json.JSONDecodeError as e:
+        raise ErrorData(INVALID_PARAMS, f"Invalid JSON format: {e}")
+    except Exception as e:
+        raise ErrorData(INTERNAL_ERROR, f"Failed to update subscription: {e}")
+
+@mcp.tool()
+def create_subscription(address_id: str, card_id: str, product_variant_id: str, quantity: int) -> Dict:
+    """Creates a new subscription."""
+    check_terminal_client()
+    try:
+        return terminal_client.subscription.create(address_id, card_id, product_variant_id, quantity)
+    except Exception as e:
+        raise ErrorData(INTERNAL_ERROR, f"Failed to create subscription: {e}")
+
+@mcp.tool()
+def delete_subscription(subscription_id: str) -> Dict:
+    """Deletes a subscription by ID."""
+    check_terminal_client()
+    try:
+        return terminal_client.subscription.delete(subscription_id)
+    except Exception as e:
+        raise ErrorData(INTERNAL_ERROR, f"Failed to delete subscription: {e}")
