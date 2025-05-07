@@ -19,6 +19,7 @@ class Terminal:
             raise ValueError("Bearer token is required.  Please set TERMINAL_BEARER_TOKEN environment variable or pass it to the Terminal constructor.")
         self.token = self.Token(self)
         self.profile = self.Profile(self)
+        self.address = self.Address(self)
 
     def _get(self, path: str) -> Dict:
         return self._request("GET", path)
@@ -26,8 +27,8 @@ class Terminal:
     def _put(self, path: str, data: Dict) -> Dict:
         return self._request("PUT", path, json=data)
 
-    def _post(self, path: str) -> Dict:
-        return self._request("POST", path)
+    def _post(self, path: str, data: Dict) -> Dict:
+        return self._request("POST", path, json=data)
 
     def _delete(self, path: str) -> Dict:
         return self._request("DELETE", path)
@@ -96,6 +97,33 @@ class Terminal:
             if name:
                 data["name"] = name
             return self.terminal._put("/profile", data)
+
+    class Address:
+        def __init__(self, terminal):
+            self.terminal = terminal
+
+        def list(self) -> List[Dict]:
+            """Lists the current user's shipping addresses."""
+            return self.terminal._get("/address")
+
+        def get(self, address_id: str) -> Dict:
+            """Gets a shipping address by ID."""
+            return self.terminal._get(f"/address/{address_id}")
+
+        def create(self, city: str, country: str, name: str, street1: str, zip: str) -> Dict:
+            """Creates a new shipping address."""
+            data = {
+                "city": city,
+                "country": country,
+                "name": name,
+                "street1": street1,
+                "zip": zip,
+            }
+            return self.terminal._post("/address", data)
+
+        def delete(self, address_id: str) -> Dict:
+            """Deletes a shipping address by ID."""
+            return self.terminal._delete(f"/address/{address_id}")
 
 
 terminal_client: Optional[Terminal] = None
@@ -186,3 +214,39 @@ def update_profile(email: str = None, name: str = None) -> Dict:
         return terminal_client.profile.update(email=email, name=name)
     except Exception as e:
         raise ErrorData(INTERNAL_ERROR, f"Failed to update profile: {e}")
+
+@mcp.tool()
+def list_addresses() -> List[Dict]:
+    """Lists the current user's shipping addresses."""
+    check_terminal_client()
+    try:
+        return terminal_client.address.list()
+    except Exception as e:
+        raise ErrorData(INTERNAL_ERROR, f"Failed to list addresses: {e}")
+
+@mcp.tool()
+def get_address(address_id: str) -> Dict:
+    """Gets a shipping address by ID."""
+    check_terminal_client()
+    try:
+        return terminal_client.address.get(address_id)
+    except Exception as e:
+        raise ErrorData(INTERNAL_ERROR, f"Failed to get address: {e}")
+
+@mcp.tool()
+def create_address(city: str, country: str, name: str, street1: str, zip: str) -> Dict:
+    """Creates a new shipping address."""
+    check_terminal_client()
+    try:
+        return terminal_client.address.create(city, country, name, street1, zip)
+    except Exception as e:
+        raise ErrorData(INTERNAL_ERROR, f"Failed to create address: {e}")
+
+@mcp.tool()
+def delete_address(address_id: str) -> Dict:
+    """Deletes a shipping address by ID."""
+    check_terminal_client()
+    try:
+        return terminal_client.address.delete(address_id)
+    except Exception as e:
+        raise ErrorData(INTERNAL_ERROR, f"Failed to delete address: {e}")
