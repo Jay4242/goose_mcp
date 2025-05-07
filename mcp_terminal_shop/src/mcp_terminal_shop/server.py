@@ -20,6 +20,7 @@ class Terminal:
         self.token = self.Token(self)
         self.profile = self.Profile(self)
         self.address = self.Address(self)
+        self.card = self.Card(self)
 
     def _get(self, path: str) -> Dict:
         return self._request("GET", path)
@@ -124,6 +125,31 @@ class Terminal:
         def delete(self, address_id: str) -> Dict:
             """Deletes a shipping address by ID."""
             return self.terminal._delete(f"/address/{address_id}")
+
+    class Card:
+        def __init__(self, terminal):
+            self.terminal = terminal
+
+        def list(self) -> List[Dict]:
+            """Lists the current user's credit cards."""
+            return self.terminal._get("/card")
+
+        def get(self, card_id: str) -> Dict:
+            """Gets a credit card by ID."""
+            return self.terminal._get(f"/card/{card_id}")
+
+        def create(self, token: str) -> Dict:
+            """Attaches a credit card (tokenized via Stripe) to the current user."""
+            data = {"token": token}
+            return self.terminal._post("/card", data)
+
+        def collect(self) -> Dict:
+            """Creates a temporary URL for collecting credit card information."""
+            return self.terminal._post("/card/collect")
+
+        def delete(self, card_id: str) -> Dict:
+            """Deletes a credit card by ID."""
+            return self.terminal._delete(f"/card/{card_id}")
 
 
 terminal_client: Optional[Terminal] = None
@@ -250,3 +276,48 @@ def delete_address(address_id: str) -> Dict:
         return terminal_client.address.delete(address_id)
     except Exception as e:
         raise ErrorData(INTERNAL_ERROR, f"Failed to delete address: {e}")
+
+@mcp.tool()
+def list_cards() -> List[Dict]:
+    """Lists the current user's credit cards."""
+    check_terminal_client()
+    try:
+        return terminal_client.card.list()
+    except Exception as e:
+        raise ErrorData(INTERNAL_ERROR, f"Failed to list cards: {e}")
+
+@mcp.tool()
+def get_card(card_id: str) -> Dict:
+    """Gets a credit card by ID."""
+    check_terminal_client()
+    try:
+        return terminal_client.card.get(card_id)
+    except Exception as e:
+        raise ErrorData(INTERNAL_ERROR, f"Failed to get card: {e}")
+
+@mcp.tool()
+def create_card(token: str) -> Dict:
+    """Attaches a credit card (tokenized via Stripe) to the current user."""
+    check_terminal_client()
+    try:
+        return terminal_client.card.create(token)
+    except Exception as e:
+        raise ErrorData(INTERNAL_ERROR, f"Failed to create card: {e}")
+
+@mcp.tool()
+def collect_card() -> Dict:
+    """Creates a temporary URL for collecting credit card information."""
+    check_terminal_client()
+    try:
+        return terminal_client.card.collect()
+    except Exception as e:
+        raise ErrorData(INTERNAL_ERROR, f"Failed to collect card: {e}")
+
+@mcp.tool()
+def delete_card(card_id: str) -> Dict:
+    """Deletes a credit card by ID."""
+    check_terminal_client()
+    try:
+        return terminal_client.card.delete(card_id)
+    except Exception as e:
+        raise ErrorData(INTERNAL_ERROR, f"Failed to delete card: {e}")
