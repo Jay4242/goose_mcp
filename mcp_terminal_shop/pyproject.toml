@@ -1,0 +1,18 @@
+[project]
+name = "mcp_terminal_shop"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "python-dotenv",
+    "fastmcp",
+    "requests"
+]
+
+[project.scripts]
+mcp_terminal_shop = "mcp_terminal_shop:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
